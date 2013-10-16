@@ -1,0 +1,89 @@
+{% extends 'base.jinja' %}
+
+{% block head %}<link href="{{ STATIC }}{{ config['TEMPLATE'] }}/css/state.css" rel="stylesheet" type="text/css">{% endblock %}
+{% block title %}{{ _('Invoice')}} {% if invoice.reference %}{{ invoice.reference }}{% else %} - {% trans %}Not reference yet{% endtrans %}{% endif %}{% endblock %}
+{% block metadescription %}{{ _('Invoice')}} {% if invoice.reference %}{{ invoice.reference }}{% else %}- {% trans %}Not reference yet{% endtrans %}{% endif %}{% endblock %}
+{% block canonical %}{{ url_for('account.invoice.render', uri=invoice.id) }}{% endblock %}
+
+{% block main %}
+{% set bread_crumbs = [(url_for('nereid.website.home'), _('Home')), (url_for('account.invoice.render_list'), _('Invoices')), (url_for('account.invoice.render', uri=invoice.id), invoice.number or _('Not reference yet'))] %}
+{% set invoice_state = {'draft': _('Draft'), 'validated': _('Validated'), 'posted': _('Posted'), 'paid': _('Paid'), 'cancel': _('Canceled')} %}
+{% set invoice_type = {'out_invoice': _('Invoice'), 'out_credit_note': _('Credit Note')} %}
+{% include 'nav.jinja' %}
+<div class="row">
+    <div class="span12 page-header">
+        <h2>{{ _('Invoice') }} {% if invoice.number %}{{ invoice.number }}{% else %}<small>({% trans %}Not reference yet{% endtrans %})</small>{% endif %}</h2>
+    </div>
+</div>
+<div class="row">
+    <div class="span6">
+        <h4>{{ _('Party') }}</h4>
+        {{ invoice.party.rec_name }}<br>
+        {{ _('VAT') }}: {{ invoice.party.vat_code }}
+    </div>
+    <div class="span6">
+        <h4>{{ _('Invoice Address') }}</h4>
+        {{ invoice.invoice_address.rec_name }}<br>
+        {{ invoice.invoice_address.subdivision.name }} {{ invoice.invoice_address.country.name }}
+    </div>
+</div>
+<hr/>
+<div class="row">
+    <div class="span12">
+        <div id="invoice-details" class="tab-content">
+            <div class="tab-pane fade in active" id="lines">
+                {% if invoice.lines %}<table class="table table-striped">
+                  <tbody>
+                  <tr class="blacky">
+                    <th>{{ _('Name') }}</th>
+                    <th>{{ _('Quantity') }}</th>
+                    <th>{{ _('Unit Price') }}</th>
+                    <th>{{ _('Total Price') }}</th>
+                  </tr>
+                  {% for line in invoice.lines %}
+                  <tr>
+                    <td>{{ line.description }}</td>
+                    <td>{{ line.quantity|int }} {{ line.unit.name }}</td>
+                    <td>{{ line.unit_price|currencyformat(line.invoice.currency.code) }}</td>
+                    <td>{{ line.amount|currencyformat(line.invoice.currency.code) }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+                </table>
+                {% else %}<div class="alert">{{ _('Not lines are available') }}.</div>{% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row-fluid">
+    <div class="span6">
+        <div class="well">
+            <h3>{{ _('Information') }}</h3>
+            <div id="invoice_totals">
+                <table class="table table-bordered">
+                <tbody>
+                <tr><td>{{ _('Type') }}</td><td>{{ invoice_type[invoice.type] }}</td></tr>
+                <tr><td>{{ _('State') }}</td><td class="align-right"><span class="state state-small state-{{ invoice.state }}">{{ invoice_state[invoice.state] }}</span></td></tr>
+                <tr><td>{{ _('Date') }}</td><td class="align-right">{{ invoice.invoice_date|dateformat }}</td></tr>
+                <tr><td>{{ _('Payment Term') }}</td><td class="align-right">{{ invoice.payment_term.rec_name }}</td></tr>
+                </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="span6">
+        <div class="well">
+            <h3>{{ _('Totals') }}</h3>
+            <div id="basket_totals">
+                <table class="table table-bordered">
+                <tbody>
+                <tr><td>{{ _('Untaxed') }}</td><td class="align-right">{{ invoice.untaxed_amount|currencyformat(invoice.currency.code) }}</td></tr>
+                <tr><td>{{ _('Tax') }}</td><td class="align-right">{{ invoice.tax_amount|currencyformat(invoice.currency.code) }}</td></tr>
+                <tr class="success"><td><h4>{{ _('Total') }}</h4></td><td class="align-right"><h3 class="price_color">{{ invoice.total_amount|currencyformat(invoice.currency.code) }}</h3></td></tr>
+                </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
