@@ -2,13 +2,13 @@
 <tryton>
     <data >
         <record id="invoice" model="nereid.url_rule">
-            <field name="rule">/&lt;language&gt;/invoice/</field>
+            <field name="rule">/invoice/</field>
             <field name="endpoint">account.invoice.render_list</field>
             <field name="sequence" eval="10" />
             <field name="url_map" ref="nereid.default_url_map" />
         </record>
         <record id="invoice_detail" model="nereid.url_rule">
-            <field name="rule">/&lt;language&gt;/invoice/&lt;uri&gt;</field>
+            <field name="rule">/invoice/&lt;uri&gt;</field>
             <field name="endpoint">account.invoice.render</field>
             <field name="sequence" eval="20" />
             <field name="url_map" ref="nereid.default_url_map" />
